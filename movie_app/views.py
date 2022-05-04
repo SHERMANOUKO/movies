@@ -9,10 +9,9 @@ from rest_framework.decorators import action
 # Create your views here.
 
 class MovieViewset(viewsets.ViewSet):
-    permission_classes = []
+    # permission_classes = []
 
     def list(self, request):
-        """list all daily stock"""
 
         queryset = Movie.objects.all()
         movie_serializer = ListMovieSerializer(queryset, many=True)
@@ -29,16 +28,16 @@ class MovieViewset(viewsets.ViewSet):
 
     def create(self, request):
         
-        daily_stock_serializer = MovieSerializer(data=request.data)
+        movie_serializer = MovieSerializer(data=request.data)
 
-        if not daily_stock_serializer.is_valid():
+        if not movie_serializer.is_valid():
             return Response(
-                {'details':daily_stock_serializer.errors, 'code': 400},
+                {'details':movie_serializer.errors, 'code': 400},
                 status=status.HTTP_400_BAD_REQUEST
             )
     
         try:
-            validated_data = daily_stock_serializer.validated_data
+            validated_data = movie_serializer.validated_data
             Movie.objects.create(
                 title = validated_data.get("title"),
                 type = validated_data.get("type"),
