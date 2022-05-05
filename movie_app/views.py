@@ -1,6 +1,7 @@
 from movie_app.authentication import token_generator, expired_token_handler, expires_in
-from movie_app.models import UserAccount, TokenModel, Movie
-from movie_app.serializers import LoginSerializer, MovieSerializer, ListMovieSerializer
+from movie_app.models import UserAccount, TokenModel, Movie, RentMovie
+from movie_app.serializers import LoginSerializer, MovieSerializer, ListMovieSerializer, \
+                                    RentMovieSerializer
 
 from rest_framework import viewsets, status
 from rest_framework.response import Response
@@ -36,22 +37,63 @@ class MovieViewset(viewsets.ViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
     
-        try:
-            validated_data = movie_serializer.validated_data
-            Movie.objects.create(
-                title = validated_data.get("title"),
-                type = validated_data.get("type"),
-                genre = validated_data.get("genre"),
-                release_year = validated_data.get("release_year"),
-                avatar = validated_data.get("avatar"),
-                rent_price = validated_data.get("rent_price"),
-                max_rent_days = validated_data.get("max_rent_days")
-            )
-        except Exception as e:
+        
+        validated_data = movie_serializer.validated_data
+        Movie.objects.create(
+            title = validated_data.get("title"),
+            type = validated_data.get("type"),
+            genre = validated_data.get("genre"),
+            release_year = validated_data.get("release_year"),
+            avatar = validated_data.get("avatar"),
+            rent_price = validated_data.get("rent_price"),
+            max_rent_days = validated_data.get("max_rent_days")
+        )
+
+        return Response(
+            {'details':'Movie succesfully created', 'code':200},
+            status=status.HTTP_200_OK
+        )
+
+    def destroy(self, request, pk=None):
+
+        Movie.objects.filter(id=pk).delete()
+
+        return Response(
+            {'details':'Movie succesfully deleted', 'code':200},
+            status=status.HTTP_200_OK
+        )
+
+class RentedMovieViewset(viewsets.ViewSet):
+    # permission_classes = []
+
+    def create(self, request):
+        
+        rented_movie_serializer = RentMovieSerializer(data=request.data)
+
+        if not rented_movie_serializer.is_valid():
             return Response(
-                {'details':str(e), 'code':500},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                {'details':rented_movie_serializer.errors, 'code': 400},
+                status=status.HTTP_400_BAD_REQUEST
             )
+    
+        validated_data = rented_movie_serializer.validated_data
+
+        try:
+            movie = Movie.objects.get(id=validated_data.get("movie_id"))
+        except TokenModel.DoesNotExist:
+            return Response(
+                {'details':"The selected movie does not exist in database", 'code':404},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        RentMovie.objects.create(
+            movie_id = movie,
+            national_id_number = validated_data.get("national_id_number"),
+            phone_number = validated_data.get("phone_number"),
+            issue_date = validated_data.get("issue_date"),
+            return_date = validated_data.get("return_date"),
+            returned = validated_data.get("returned")
+        )
 
         return Response(
             {'details':'Movie succesfully created', 'code':200},

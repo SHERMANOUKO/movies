@@ -1,11 +1,19 @@
-from tkinter.messagebox import RETRY
-from movie_app.models import Movie
+from movie_app.models import Movie, RentMovie
 
 from rest_framework import serializers
+
 
 class NestedMovieSerializer(serializers.Serializer):
 
     title = serializers.CharField(max_length=100)
+
+class ListRentMovieSerializer(serializers.Serializer):
+    
+    national_id_number = serializers.IntegerField()
+    phone_number = serializers.CharField(max_length=25)
+    issue_date = serializers.DateField()
+    return_date = serializers.DateField()
+    movie = NestedMovieSerializer()
 
 class RentMovieSerializer(serializers.Serializer):
     
@@ -13,7 +21,8 @@ class RentMovieSerializer(serializers.Serializer):
     phone_number = serializers.CharField(max_length=25)
     issue_date = serializers.DateField()
     return_date = serializers.DateField()
-    movie = NestedMovieSerializer()
+    movie_id = serializers.IntegerField()
+    returned = serializers.BooleanField()
 
 class MovieSerializer(serializers.Serializer):
     GENRE_CHOICES = (
@@ -61,7 +70,7 @@ class ListMovieSerializer(serializers.ModelSerializer):
             "rent_price",
             "max_rent_days"
         ]
-        
+
 class LoginSerializer(serializers.Serializer):
     username = serializers.CharField()
     password = serializers.CharField()

@@ -21,4 +21,5 @@ from movies.router import router
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include((router.urls, 'movies'))),
+    path('', include((router.urls, 'rentmovie'))),
 ]
