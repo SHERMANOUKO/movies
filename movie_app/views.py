@@ -1,7 +1,7 @@
 from movie_app.authentication import token_generator, expired_token_handler, expires_in
 from movie_app.models import UserAccount, TokenModel, Movie, RentMovie
 from movie_app.serializers import LoginSerializer, MovieSerializer, ListMovieSerializer, \
-                                    RentMovieSerializer
+                                    RentMovieSerializer, ListRentMovieSerializer
 
 from rest_framework import viewsets, status
 from rest_framework.response import Response
@@ -64,7 +64,37 @@ class MovieViewset(viewsets.ViewSet):
         )
 
 class RentedMovieViewset(viewsets.ViewSet):
-    # permission_classes = []
+    permission_classes = []
+
+    def list(self, request):
+
+        queryset = RentMovie.objects.select_related('movie_id').all()
+        
+        rented_movies = []
+
+        for movie in queryset:
+            rented_movies.append({
+                'id': movie.id,
+                'title': movie.movie_id.title,
+                'national_id_number': movie.national_id_number,
+                'phone_number': movie.phone_number,
+                'issue_date': movie.issue_date,
+                'return_date': movie.return_date,
+                'returned': movie.returned
+            })
+        
+        rented_movie_serializer = ListRentMovieSerializer(rented_movies, many=True)
+        
+        if not rented_movie_serializer:
+            return Response(
+                {'details':'No rented movies available.', 'code':400},
+                status=status.HTTP_200_OK
+            )
+        
+        return Response(
+            {'details':rented_movie_serializer.data, 'code':200},
+            status=status.HTTP_200_OK
+        )
 
     def create(self, request):
         

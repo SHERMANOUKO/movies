@@ -3,17 +3,14 @@ from movie_app.models import Movie, RentMovie
 from rest_framework import serializers
 
 
-class NestedMovieSerializer(serializers.Serializer):
-
-    title = serializers.CharField(max_length=100)
-
 class ListRentMovieSerializer(serializers.Serializer):
     
+    title = serializers.CharField(max_length=100)
     national_id_number = serializers.IntegerField()
     phone_number = serializers.CharField(max_length=25)
     issue_date = serializers.DateField()
     return_date = serializers.DateField()
-    movie = NestedMovieSerializer()
+    returned = serializers.BooleanField()
 
 class RentMovieSerializer(serializers.Serializer):
     
@@ -50,7 +47,6 @@ class MovieSerializer(serializers.Serializer):
 
     def validate(self, data):
         if data["type"] == "CHILDREN":
-            print(99999)
             if not data.get("children_max_age"):
                 raise serializers.ValidationError("Children maximum age should be provided for Children movies")
         return data
