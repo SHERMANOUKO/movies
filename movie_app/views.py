@@ -64,7 +64,6 @@ class MovieViewset(viewsets.ViewSet):
         )
 
 class RentedMovieViewset(viewsets.ViewSet):
-    permission_classes = []
 
     def list(self, request):
 
